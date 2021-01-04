@@ -54,7 +54,7 @@ public:
 	void stopUp();
 	void stopDown();
 
-	void update(float elapsedTime, sf::Vector2i mousPosition);
+	void update(float elapsedTime, sf::Vector2i mousPosition, sf::VertexArray& level);
 
 	void upgradeSpeed();
 

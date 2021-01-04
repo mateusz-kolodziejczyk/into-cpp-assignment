@@ -23,7 +23,7 @@ int main()
 	resolution.y = 1080;
 	RenderWindow window(VideoMode(resolution.x, resolution.y), "Zombie Arena", Style::Default);
 
-	View mainView(sf::FloatRect(0, 0, resolution.x, resolution.y));
+	View mainView(FloatRect(0, 0, resolution.x, resolution.y));
 	Clock clock;
 	Time gameTimeTotal;
 	Vector2f mouseWorldPosition;
@@ -63,6 +63,7 @@ int main()
 
 					int tileSize = generateLevel(background, arena);
 
+					std::cout << "\nTile size main: " << tileSize;
 					player.spawn(arena, resolution, tileSize);
 					numZombies = 10;
 
@@ -82,20 +83,28 @@ int main()
 
 		if (state == State::PLAYING) {
 			if (Keyboard::isKeyPressed(Keyboard::W)) {
+				player.moveUp();
 			}
 			else {
+				player.stopUp();
 			}
 			if (Keyboard::isKeyPressed(Keyboard::S)) {
+				player.moveDown();
 			}
 			else {
+				player.stopDown();
 			}
 			if (Keyboard::isKeyPressed(Keyboard::A)) {
+				player.moveLeft();
 			}
 			else {
+				player.stopLeft();
 			}
 			if (Keyboard::isKeyPressed(Keyboard::D)) {
+				player.moveRight();
 			}
 			else {
+				player.stopRight();
 			}
 		}
 
@@ -105,11 +114,11 @@ int main()
 			gameTimeTotal += dt;
 			float dtAsSeconds = dt.asSeconds();
 
-			
+
 			mouseScreenPosition = Mouse::getPosition(window);
 			mouseWorldPosition = window.mapPixelToCoords(Mouse::getPosition(), mainView);
 
-			player.update(dtAsSeconds, Mouse::getPosition());
+			player.update(dtAsSeconds, Mouse::getPosition(), background);
 
 			Vector2f playerPosition(player.getCenter());
 			mainView.setCenter(player.getCenter());
@@ -119,7 +128,7 @@ int main()
 					zombies[i].update(dt.asSeconds(), playerPosition);
 				}
 			}
-			
+
 		}
 		//Draw the scene
 		if (state == State::PLAYING) {

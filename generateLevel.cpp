@@ -35,6 +35,7 @@ int generateLevel(VertexArray& rVA, IntRect arena) {
 				rVA[currentVertex + 3].texCoords = Vector2f(0, 0 + TILE_SIZE);
 			}
 			else {
+
 				if (h % 3 == 0) {
 					int verticalOffset = 1 * TILE_SIZE;
 					rVA[currentVertex + 0].texCoords = Vector2f(0, verticalOffset);
@@ -58,5 +59,4 @@ int generateLevel(VertexArray& rVA, IntRect arena) {
 		}
 	}
 	return TILE_SIZE;
-	//
 }

@@ -1,5 +1,5 @@
 #pragma once
-class Physics
-{
-};
+#include <SFML/Graphics.hpp>;
+namespace physics {
 
+}

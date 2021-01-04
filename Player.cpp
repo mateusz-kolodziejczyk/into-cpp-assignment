@@ -1,6 +1,7 @@
 #include "Player.h"
 #include <math.h>
-
+#include "collision.h"
+#include <iostream>
 
 using namespace sf;
 Player::Player() {
@@ -10,7 +11,7 @@ Player::Player() {
 
 
 	// Texture
-	m_Texture.loadFromFile("graphics/player.png");
+	m_Texture.loadFromFile("graphics/characters/player_stand.png");
 	m_Sprite.setTexture(m_Texture);
 
 	//Origin
@@ -31,7 +32,7 @@ void Player::spawn(IntRect arena, Vector2f resolution, int tileSize) {
 	m_Arena.height = arena.height;
 
 	// Rmeember
-	m_TileSize = m_TileSize;
+	m_TileSize = tileSize;
 
 	//Resoltuion
 	m_Resolution.x = resolution.x;
@@ -106,7 +107,7 @@ void Player::stopDown() {
 	m_DownPressed = false;
 }
 
-void Player::update(float elapsedTime, Vector2i mousePosition) {
+void Player::update(float elapsedTime, Vector2i mousePosition, sf::VertexArray& level) {
 	if (m_UpPressed) {
 		m_Position.y -= m_Speed * elapsedTime;
 	}
@@ -119,25 +120,16 @@ void Player::update(float elapsedTime, Vector2i mousePosition) {
 	if (m_LeftPressed) {
 		m_Position.x -= m_Speed * elapsedTime;
 	}
+
 	m_Sprite.setPosition(m_Position);
 
-	// Bounds
-	if (m_Position.x > m_Arena.width - m_TileSize) {
-		m_Position.x = m_Arena.width - m_TileSize;
-	}
-	if (m_Position.x < m_Arena.width + m_TileSize) {
-		m_Position.x = m_Arena.width + m_TileSize;
-	}
-	if (m_Position.y > m_Arena.width - m_TileSize) {
-		m_Position.y = m_Arena.width - m_TileSize;
-	}
-	if (m_Position.y < m_Arena.width + m_TileSize) {
-		m_Position.y = m_Arena.width + m_TileSize;
-	}
+	// Collision
+	bool colliding = collision::boundsCheck(m_Position, m_Arena, m_TileSize);
+	bool onFloor = collision::floorCheck(m_Position, level, m_Arena, m_Sprite.getGlobalBounds(), m_TileSize);
 
 	float angle = (atan2(mousePosition.y - m_Resolution.y / 2, mousePosition.x - m_Resolution.x / 2) * 180) / 3.141;
 
-	m_Sprite.setRotation(angle);
+	//m_Sprite.setRotation(angle);
 }
 
 void Player::upgradeSpeed() {
