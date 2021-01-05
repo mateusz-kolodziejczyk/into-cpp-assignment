@@ -38,6 +38,7 @@ int main()
 
 	int numZombies = 0;
 	int numZombiesAlive = 0;
+	int tileSize = 0;
 	Zombie* zombies = nullptr;
 	while (window.isOpen()) {
 		//Handle input
@@ -57,20 +58,20 @@ int main()
 					state = State::PLAYING;
 
 
-					arena.width = 500;
-					arena.height = 500;
+					arena.width = 1000;
+					arena.height = 650;
 					arena.left = 0;
 					arena.top = 0;
 
-					int tileSize = generateLevel(background, arena);
+					tileSize = generateLevel(background, arena);
 
 					std::cout << "\nTile size main: " << tileSize;
 					player.spawn(arena, resolution, tileSize);
-					/*numZombies = 10;
+					numZombies = 10;
 
 					delete[] zombies;
 					zombies = createHorde(numZombies, arena);
-					numZombiesAlive = numZombies;*/
+					numZombiesAlive = numZombies;
 					clock.restart();
 				}
 
@@ -129,7 +130,7 @@ int main()
 
 			for (int i = 0; i < numZombies; i++) {
 				if (zombies[i].isAlive()) {
-					zombies[i].update(dt.asSeconds(), playerPosition);
+					zombies[i].update(dt.asSeconds(), playerPosition, background, arena, tileSize);
 				}
 			}
 

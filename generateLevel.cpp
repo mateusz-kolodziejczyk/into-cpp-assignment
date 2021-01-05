@@ -12,7 +12,7 @@ int generateLevel(VertexArray& rVA, IntRect arena) {
 	int worldHeight = arena.height / TILE_SIZE;
 
 	rVA.setPrimitiveType(sf::Quads);
-	
+
 	rVA.resize(worldWidth * worldHeight * VERTS_IN_QUAD);
 
 	int currentVertex = 0;
@@ -35,24 +35,19 @@ int generateLevel(VertexArray& rVA, IntRect arena) {
 				rVA[currentVertex + 3].texCoords = Vector2f(0, 0 + TILE_SIZE);
 			}
 			else {
-
-				if (h % 3 == 0 && ((w<worldWidth/2)||(w>worldWidth/2+1)||h == worldHeight-1) ) {
-					int verticalOffset = 1 * TILE_SIZE;
-					rVA[currentVertex + 0].texCoords = Vector2f(0, verticalOffset);
-					rVA[currentVertex + 1].texCoords = Vector2f(TILE_SIZE, verticalOffset);
-					rVA[currentVertex + 2].texCoords = Vector2f(TILE_SIZE, TILE_SIZE + verticalOffset);
-					rVA[currentVertex + 3].texCoords = Vector2f(0, TILE_SIZE + verticalOffset);
+				int verticalOffset = 3 * TILE_SIZE;
+				if (h % 3 == 0) {
+					if ((h % 6 != 0 || h == worldHeight - 1) && (w < worldWidth / 2 - 1 || w > worldWidth / 2 + 1 || h == worldHeight - 1)) {
+						verticalOffset = 1 * TILE_SIZE;
+					}
+					else if (h % 6 == 0 && (w < worldWidth / 4 || (w > worldWidth / 4 + 1 && w < (worldWidth / 4) * 3) || w >(worldWidth / 4) * 3 + 1)) {
+						verticalOffset = 1 * TILE_SIZE;
+					}
 				}
-				else {
-					// Use random floor texture
-					int verticalOffset = 3 * TILE_SIZE;
-
-					rVA[currentVertex + 0].texCoords = Vector2f(0, verticalOffset);
-					rVA[currentVertex + 1].texCoords = Vector2f(TILE_SIZE, verticalOffset);
-					rVA[currentVertex + 2].texCoords = Vector2f(TILE_SIZE, TILE_SIZE + verticalOffset);
-					rVA[currentVertex + 3].texCoords = Vector2f(0, TILE_SIZE + verticalOffset);
-				}
-
+				rVA[currentVertex + 0].texCoords = Vector2f(0, verticalOffset);
+				rVA[currentVertex + 1].texCoords = Vector2f(TILE_SIZE, verticalOffset);
+				rVA[currentVertex + 2].texCoords = Vector2f(TILE_SIZE, TILE_SIZE + verticalOffset);
+				rVA[currentVertex + 3].texCoords = Vector2f(0, TILE_SIZE + verticalOffset);
 			}
 			// Position eady for he next vertices
 			currentVertex += VERTS_IN_QUAD;

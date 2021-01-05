@@ -30,6 +30,8 @@ private:
 
     // Where is this zombie?
     Vector2f m_Position;
+    // Last positionof the zombie used for velocity calculation
+    Vector2f m_LastPosition;
 
     // A sprite for the zombie
     Sprite m_Sprite;
@@ -42,6 +44,15 @@ private:
 
     // Is it still alive?
     bool m_Alive = true;
+
+    // Is the zombie moving left or right?
+    bool m_MovingLeft = true;
+
+    // The animation should only switch once every x time  elapsed
+    float animationTimer = 0;
+
+    // Use this to switch between the walk animations.
+    int walkAnimation = 1;
 
     // Public prototypes go here
 public:
@@ -61,8 +72,10 @@ public:
     // Get a copy of the sprite to draw
     Sprite getSprite();
 
+    // Animate movement of the zombie
+    void animateMovement();
     // Update the zombie each frame
-    void update(float elapsedTime, Vector2f playerLocation);
+    void update(float elapsedTime, Vector2f playerLocation, const VertexArray& level, IntRect& arena, int tileSize);
 };
 
 #endif /* zombie_hpp */

@@ -18,7 +18,7 @@ bool collision::boundsCheck(Vector2f& position, const IntRect& arena, int tileSi
 	return collided;
 }
 
-bool collision::floorCheck(Vector2f& position, VertexArray& level, IntRect& arena, const sf::FloatRect& bounds, int tileSize, const Vector2f& lastPosition, float& yVelocity) {
+bool collision::floorCheck(Vector2f& position, const VertexArray& level, IntRect& arena, const sf::FloatRect& bounds, int tileSize, const Vector2f& lastPosition, float& yVelocity) {
 
 	bool onFloor = false;
 	int worldWidth = arena.width / tileSize;

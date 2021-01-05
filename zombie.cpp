@@ -3,22 +3,24 @@
 #include <cstdlib>
 #include <ctime>
 #include <math.h>
+#include "collision.h"
+#include "physics.h"
 
 enum class ZombieType { BLOATER, CRAWLER, CHASER };
 void Zombie::spawn(float startX, float startY, int type, int seed) {
 	switch ((ZombieType)type) {
 	case ZombieType::BLOATER:
-		m_Sprite = Sprite(TextureHolder::GetTexture("graphics/bloater.png"));
+		m_Sprite = Sprite(TextureHolder::GetTexture("graphics/characters/zombie_stand.png"));
 		m_Speed = BLOATER_SPEED;
 		m_Health = BLOATER_HEALTH;
 		break;
 	case ZombieType::CRAWLER:
-		m_Sprite = Sprite(TextureHolder::GetTexture("graphics/crawler.png"));
+		m_Sprite = Sprite(TextureHolder::GetTexture("graphics/characters/zombie_stand.png"));
 		m_Speed = CRAWLER_SPEED;
 		m_Health = CRAWLER_HEALTH;
 		break;
 	case ZombieType::CHASER:
-		m_Sprite = Sprite(TextureHolder::GetTexture("graphics/chaser.png"));
+		m_Sprite = Sprite(TextureHolder::GetTexture("graphics/characters/zombie_stand.png"));
 		m_Speed = CHASER_SPEED;
 		m_Health = CHASER_HEALTH;
 		break;
@@ -29,9 +31,11 @@ void Zombie::spawn(float startX, float startY, int type, int seed) {
 	m_Speed *= modifier;
 	m_Position.x = startX;
 	m_Position.y = startY;
+	m_LastPosition = m_Position;
 
-	m_Sprite.setOrigin(25, 25);
+	m_Sprite.setOrigin(25, 30);
 	m_Sprite.setPosition(m_Position);
+	m_MovingLeft ? m_Sprite.scale(-1.0f, 1.0f) : m_Sprite.scale(1.0f, 1.0f);
 }
 
 bool Zombie::hit() {
@@ -57,40 +61,27 @@ Sprite Zombie::getSprite() {
 	return m_Sprite;
 }
 
-void Zombie::update(float elapsedTime, Vector2f playerLocation)
+void Zombie::update(float elapsedTime, Vector2f playerLocation, const VertexArray& level, IntRect& arena, int tileSize)
 {
+	float yVelocity = m_Position.y - m_LastPosition.y;
 	float playerX = playerLocation.x;
 	float playerY = playerLocation.y;
-
-	// Update the zombie position variables
-	if (playerX > m_Position.x)
-	{
-		m_Position.x = m_Position.x + m_Speed * elapsedTime;
-	}
-
-	if (playerY > m_Position.y)
-	{
-		m_Position.y = m_Position.y + m_Speed * elapsedTime;
-	}
-
-	if (playerX < m_Position.x)
-	{
-		m_Position.x = m_Position.x - m_Speed * elapsedTime;
-	}
-
-	if (playerY < m_Position.y)
-	{
-		m_Position.y = m_Position.y - m_Speed * elapsedTime;
-	}
-
+	
+	// Zombie moves in one direction, then reverses when they hit a wall
+	m_Position.x -= m_MovingLeft ? m_Speed * elapsedTime : -m_Speed*elapsedTime;
+	
 	// Move the sprite
 	m_Sprite.setPosition(m_Position);
+	bool onFloor = collision::floorCheck(m_Position,level, arena, m_Sprite.getGlobalBounds(), tileSize, m_LastPosition, yVelocity);
+	bool hitWall = collision::boundsCheck(m_Position, arena, tileSize);
+	if (hitWall) {
+		m_MovingLeft = !m_MovingLeft;
+		m_Sprite.scale(-1.0f, 1.0f);
+	}
+	m_LastPosition = m_Position;
+	if (!onFloor) {
+		physics::gravityFalling(elapsedTime, m_Position, yVelocity);
+	}
 
-	// Face the sprite in the correct direction
-	float angle = (atan2(playerY - m_Position.y,
-		playerX - m_Position.x)
-		* 180) / 3.141;
-
-	m_Sprite.setRotation(angle);
 
 }
