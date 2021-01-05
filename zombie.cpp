@@ -10,17 +10,20 @@ enum class ZombieType { BLOATER, CRAWLER, CHASER };
 void Zombie::spawn(float startX, float startY, int type, int seed) {
 	switch ((ZombieType)type) {
 	case ZombieType::BLOATER:
-		m_Sprite = Sprite(TextureHolder::GetTexture("graphics/characters/zombie_stand.png"));
+		m_Sprite = Sprite(TextureHolder::GetTexture("graphics/characters/zombie_walk1.png"));
+
 		m_Speed = BLOATER_SPEED;
 		m_Health = BLOATER_HEALTH;
 		break;
 	case ZombieType::CRAWLER:
-		m_Sprite = Sprite(TextureHolder::GetTexture("graphics/characters/zombie_stand.png"));
+		m_Sprite = Sprite(TextureHolder::GetTexture("graphics/characters/zombie_walk1.png"));
+		m_Sprite.setColor(sf::Color(255,140,140));
 		m_Speed = CRAWLER_SPEED;
 		m_Health = CRAWLER_HEALTH;
 		break;
 	case ZombieType::CHASER:
-		m_Sprite = Sprite(TextureHolder::GetTexture("graphics/characters/zombie_stand.png"));
+		m_Sprite = Sprite(TextureHolder::GetTexture("graphics/characters/zombie_walk1.png"));
+		m_Sprite.setColor(sf::Color(255,140,255));
 		m_Speed = CHASER_SPEED;
 		m_Health = CHASER_HEALTH;
 		break;
@@ -29,6 +32,8 @@ void Zombie::spawn(float startX, float startY, int type, int seed) {
 	// Express as a fraction of 1
 	modifier /= 100;
 	m_Speed *= modifier;
+	// Walking animation speed is proportional to how fast the enemy is.
+	m_AnimationLength *= 1 / (m_Speed / 80);
 	m_Position.x = startX;
 	m_Position.y = startY;
 	m_LastPosition = m_Position;
@@ -64,6 +69,7 @@ Sprite Zombie::getSprite() {
 void Zombie::update(float elapsedTime, Vector2f playerLocation, const VertexArray& level, IntRect& arena, int tileSize)
 {
 	float yVelocity = m_Position.y - m_LastPosition.y;
+	animateMovement(elapsedTime);
 	float playerX = playerLocation.x;
 	float playerY = playerLocation.y;
 	
@@ -84,4 +90,23 @@ void Zombie::update(float elapsedTime, Vector2f playerLocation, const VertexArra
 	}
 
 
+}
+
+void Zombie::animateMovement(float elapsedTime) {
+	m_AnimationTimer += elapsedTime;
+	if (m_AnimationTimer >= m_AnimationLength) {
+		m_AnimationTimer = 0;
+		// This will flip it between -1 and 1 
+		m_WalkAnimation *= -1;
+		switch (m_WalkAnimation) {
+		case 1:
+			m_Sprite.setTexture(TextureHolder::GetTexture("graphics/characters/zombie_walk1.png"));
+			break;
+		case -1:
+			m_Sprite.setTexture(TextureHolder::GetTexture("graphics/characters/zombie_walk2.png"));
+			break;
+		default:
+			break;
+		}
+	}
 }

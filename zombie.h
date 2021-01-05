@@ -48,11 +48,12 @@ private:
     // Is the zombie moving left or right?
     bool m_MovingLeft = true;
 
-    // The animation should only switch once every x time  elapsed
-    float animationTimer = 0;
+    // The animation should only switch once every x time
+    float m_AnimationTimer = 0;
+    float m_AnimationLength = 0.1;
 
     // Use this to switch between the walk animations.
-    int walkAnimation = 1;
+    int m_WalkAnimation = 1;
 
     // Public prototypes go here
 public:
@@ -73,7 +74,7 @@ public:
     Sprite getSprite();
 
     // Animate movement of the zombie
-    void animateMovement();
+    void animateMovement(float elapsedTime);
     // Update the zombie each frame
     void update(float elapsedTime, Vector2f playerLocation, const VertexArray& level, IntRect& arena, int tileSize);
 };
