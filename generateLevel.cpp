@@ -36,7 +36,7 @@ int generateLevel(VertexArray& rVA, IntRect arena) {
 			}
 			else {
 
-				if (h % 3 == 0) {
+				if (h % 3 == 0 && ((w<worldWidth/2)||(w>worldWidth/2+1)||h == worldHeight-1) ) {
 					int verticalOffset = 1 * TILE_SIZE;
 					rVA[currentVertex + 0].texCoords = Vector2f(0, verticalOffset);
 					rVA[currentVertex + 1].texCoords = Vector2f(TILE_SIZE, verticalOffset);

@@ -1,6 +1,7 @@
 #include "Player.h"
 #include <math.h>
 #include "collision.h"
+#include "Physics.h"
 #include <iostream>
 
 using namespace sf;
@@ -20,9 +21,12 @@ Player::Player() {
 
 void Player::spawn(IntRect arena, Vector2f resolution, int tileSize) {
 
-	// place in middle
+	// place in middle bottom
 	m_Position.x = arena.width / 2;
-	m_Position.y = arena.height / 2;
+	m_Position.y = arena.height - tileSize*2.2;
+
+	// Last position on spawn is identical to the current position
+	m_LastPosition = m_Position;
 
 	// Copy details of arena to the players arena.
 	m_Arena.left = arena.left;
@@ -108,6 +112,7 @@ void Player::stopDown() {
 }
 
 void Player::update(float elapsedTime, Vector2i mousePosition, sf::VertexArray& level) {
+	float verticalVelocity = m_Position.y - m_LastPosition.y;
 	if (m_UpPressed) {
 		m_Position.y -= m_Speed * elapsedTime;
 	}
@@ -120,14 +125,27 @@ void Player::update(float elapsedTime, Vector2i mousePosition, sf::VertexArray& 
 	if (m_LeftPressed) {
 		m_Position.x -= m_Speed * elapsedTime;
 	}
+	if (m_Jumped) {
+		m_LastPosition = m_Position;
+		m_Position.y += -230*elapsedTime;
+		verticalVelocity = m_Position.y - m_LastPosition.y;
+		m_Jumped = false;
+	}
 
 	m_Sprite.setPosition(m_Position);
+	// Falling
+
 
 	// Collision
 	bool colliding = collision::boundsCheck(m_Position, m_Arena, m_TileSize);
-	bool onFloor = collision::floorCheck(m_Position, level, m_Arena, m_Sprite.getGlobalBounds(), m_TileSize);
+	bool onFloor = collision::floorCheck(m_Position, level, m_Arena, m_Sprite.getGlobalBounds(), m_TileSize, m_LastPosition, verticalVelocity);
+	auto tempLastPosition = m_Position;
+	if (!onFloor) {
+		physics::gravityFalling(elapsedTime, m_Position, verticalVelocity);
+	}
 
 	float angle = (atan2(mousePosition.y - m_Resolution.y / 2, mousePosition.x - m_Resolution.x / 2) * 180) / 3.141;
+	m_LastPosition = tempLastPosition;
 
 	//m_Sprite.setRotation(angle);
 }
@@ -143,5 +161,9 @@ void Player::increaseHealthLevel(int amount) {
 	if (m_Health > m_MaxHealth) {
 		m_Health = m_MaxHealth;
 	}
+}
+
+void Player::jump() {
+	m_Jumped = true;
 }
 

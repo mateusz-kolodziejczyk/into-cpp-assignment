@@ -11,6 +11,7 @@ private:
 	const float START_HEALTH = 100;
 
 	sf::Vector2f m_Position;
+	sf::Vector2f m_LastPosition;
 	sf::Sprite m_Sprite;
 	sf::Texture m_Texture;
 	sf::Vector2f m_Resolution;
@@ -21,6 +22,7 @@ private:
 	bool m_DownPressed;
 	bool m_LeftPressed;
 	bool m_RightPressed;
+	bool m_Jumped;
 
 	int m_Health;
 	int m_MaxHealth;
@@ -53,6 +55,8 @@ public:
 	void stopRight();
 	void stopUp();
 	void stopDown();
+
+	void jump();
 
 	void update(float elapsedTime, sf::Vector2i mousPosition, sf::VertexArray& level);
 

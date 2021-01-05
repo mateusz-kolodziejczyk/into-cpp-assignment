@@ -42,6 +42,7 @@ int main()
 	while (window.isOpen()) {
 		//Handle input
 		// Handle events
+	
 		Event event;
 		while (window.pollEvent(event)) {
 			if (event.type == Event::KeyPressed) {
@@ -65,11 +66,11 @@ int main()
 
 					std::cout << "\nTile size main: " << tileSize;
 					player.spawn(arena, resolution, tileSize);
-					numZombies = 10;
+					/*numZombies = 10;
 
 					delete[] zombies;
 					zombies = createHorde(numZombies, arena);
-					numZombiesAlive = numZombies;
+					numZombiesAlive = numZombies;*/
 					clock.restart();
 				}
 
@@ -105,6 +106,9 @@ int main()
 			}
 			else {
 				player.stopRight();
+			}
+			if (Keyboard::isKeyPressed(Keyboard::Space)) {
+				player.jump();
 			}
 		}
 
