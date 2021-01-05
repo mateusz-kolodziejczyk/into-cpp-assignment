@@ -4,6 +4,7 @@
 
 
 
+enum class AnimationState { MOVING, JUMPING, IDLE };
 class Player
 {
 private:
@@ -18,14 +19,24 @@ private:
 	sf::IntRect m_Arena;
 	int m_TileSize;
 
-	bool m_UpPressed;
-	bool m_DownPressed;
 	bool m_LeftPressed;
 	bool m_RightPressed;
 	bool m_Jumped;
+	bool m_JumpedRecently = false;
 
 	int m_Health;
 	int m_MaxHealth;
+	float m_JumpStrength = 500;
+
+	// Animation
+	float m_MoveAnimationLength;
+	float m_MoveAnimationTimer = 0;
+	int m_MoveAnimation = 1;
+	float m_ShootingAnimationLength;
+	float m_ShootingAnimationTimer;
+	AnimationState m_AnimationState;
+	
+
 	
 	sf::Time m_LastHit;
 	float m_Speed;
@@ -48,13 +59,9 @@ public:
 
 	void moveLeft();
 	void moveRight();
-	void moveUp();
-	void moveDown();
 
 	void stopLeft();
 	void stopRight();
-	void stopUp();
-	void stopDown();
 
 	void jump();
 
@@ -65,6 +72,11 @@ public:
 	void upgradeHealth();
 
 	void increaseHealthLevel(int amount);
+
+	void animateMovement(float elapsedTime);
+	void animate(float elapsedTime);
+
+	float getDirection();
 
 };
 

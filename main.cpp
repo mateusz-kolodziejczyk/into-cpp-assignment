@@ -8,6 +8,8 @@
 #include "ZombieArena.h"
 #include "textureHolder.h"
 #include "zombieSpawner.h"
+#include "bullet.h"
+#include "collision.h"
 #include <set>
 
 using namespace sf;
@@ -42,7 +44,10 @@ int main()
 	int numZombiesAlive = 0;
 	int tileSize = 0;
 	std::vector<Zombie*> zombies;
+	std::vector<Bullet> bullets;
 	std::vector<ZombieSpawner> zombieSpawners;
+	Time lastShot;
+	float fireRate = 3;
 	while (window.isOpen()) {
 		//Handle input
 		// Handle events
@@ -59,7 +64,7 @@ int main()
 				}
 				else if (event.key.code == Keyboard::Return && state == State::GAME_OVER) {
 					state = State::PLAYING;
-
+					
 
 					arena.width = 1000;
 					arena.height = 850;
@@ -73,7 +78,7 @@ int main()
 					player.spawn(arena, resolution, tileSize);
 					mainView.setCenter(arena.width / 2, arena.height / 2);
 
-					std::set<int> zombieTypes = { 1 };
+					std::set<int> zombieTypes = { 0 };
 					auto rightSpawner = ZombieSpawner(Vector2f(arena.width - tileSize * 1.5, tileSize * 2.5), 10, zombieTypes, true);
 					auto leftSpawner = ZombieSpawner(Vector2f(tileSize * 1.5, tileSize * 2.5), 10, zombieTypes, false);
 					zombieSpawners.push_back(rightSpawner);
@@ -88,18 +93,6 @@ int main()
 			}
 
 			if (state == State::PLAYING) {
-				if (Keyboard::isKeyPressed(Keyboard::W)) {
-					player.moveUp();
-				}
-				else {
-					player.stopUp();
-				}
-				if (Keyboard::isKeyPressed(Keyboard::S)) {
-					player.moveDown();
-				}
-				else {
-					player.stopDown();
-				}
 				if (Keyboard::isKeyPressed(Keyboard::A)) {
 					player.moveLeft();
 				}
@@ -113,11 +106,23 @@ int main()
 					player.stopRight();
 				}
 				if (Keyboard::isKeyPressed(Keyboard::Space)) {
-					player.jump();
+ 					player.jump();
 				}
 			}
 		}
 
+		// Fire a bullet
+		if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+			if (gameTimeTotal.asMilliseconds() - lastShot.asMilliseconds() > 1000 / fireRate) {
+				std::cout << "\nPosition: (" << player.getCenter().x << "," << player.getCenter().y << ")";
+				// 1 = right, -1 = left
+				bool facingRight = player.getDirection() > 0 ? true : false;
+				auto bullet = Bullet(player.getCenter().x + player.getDirection() * (player.getPosition().width/2), player.getCenter().y+10, facingRight, arena);
+				bullets.push_back(bullet);
+				lastShot = gameTimeTotal;
+			}
+
+		}
 		// Update the frame
 		if (state == State::PLAYING) {
 			Time dt = clock.restart();
@@ -149,6 +154,69 @@ int main()
 			for (auto zombie : zombies) {
 				zombie->update(dt.asSeconds(), playerPosition, background, arena, tileSize);
 			}
+
+
+			for (auto it = bullets.begin(); it != bullets.end();) {
+				bool hitWall = it->update(dtAsSeconds);
+				if (hitWall) {
+					it = bullets.erase(it);
+				}
+				else {
+					++it;
+				}
+			}
+			
+			// Collision 
+			
+			for (auto bulletIter = bullets.begin(); bulletIter != bullets.end();) {
+				bool collided = false;
+				for (auto zombieIter = zombies.begin(); zombieIter != zombies.end();) {
+					if (collision::collisionCheck(bulletIter->getPosition(), (*zombieIter)->getPosition())) {
+						collided = true;
+						if ((*zombieIter)->takeDamage()) {
+							// Delete the zombie
+							// Release the memeory from the zombie
+							delete(*zombieIter);
+							zombieIter = zombies.erase(zombieIter);
+						}
+						else {
+							++zombieIter;
+						}
+					}
+					else {
+						++zombieIter;
+					}
+				}
+				if (collided) {
+					bulletIter = bullets.erase(bulletIter);
+				}
+				else {
+					++bulletIter;
+				}
+			}
+
+			// Have any zombies touched the player?
+			for (auto zombie : zombies)
+			{
+				if (collision::collisionCheck(zombie->getPosition(), player.getPosition()))
+				{
+					if (player.hit(gameTimeTotal))
+					{
+						// More here later
+					}
+
+					if (player.getHealth() <= 0)
+					{
+						state = State::GAME_OVER;
+
+					}
+				}
+			}// End player touched
+
+			if (zombiesLeftToSpawn <= 0 && zombies.size() <= 0) {
+				state = State::GAME_OVER;
+			}
+
 		}
 
 		//Draw the scene
@@ -159,10 +227,17 @@ int main()
 
 			window.draw(background, &textureBackground);
 			window.draw(player.getSprite());
-			for (int i = 0; i < zombies.size(); i++) {
-				window.draw(zombies[i]->getSprite());
+
+			for (auto zombie : zombies) {
+			
+				window.draw(zombie->getSprite());
+			
 			}
 
+
+			for (auto bullet : bullets) {
+				window.draw(bullet.getShape());
+			}
 			if (state == State::PAUSED) {
 
 			}

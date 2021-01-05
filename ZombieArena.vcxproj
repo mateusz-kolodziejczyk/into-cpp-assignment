@@ -145,6 +145,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="bullet.cpp" />
     <ClCompile Include="collision.cpp" />
     <ClCompile Include="generateLevel.cpp" />
     <ClCompile Include="Physics.cpp" />
@@ -155,6 +156,7 @@
     <ClCompile Include="zombieSpawner.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="bullet.h" />
     <ClInclude Include="collision.h" />
     <ClInclude Include="Physics.h" />
     <ClInclude Include="Player.h" />

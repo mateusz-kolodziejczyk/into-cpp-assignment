@@ -3,7 +3,7 @@
 
 using namespace sf;
 
-bool collision::boundsCheck(Vector2f& position, const IntRect& arena, int tileSize) {
+bool collision::boundsCheck(Vector2f& position, const IntRect& arena, int tileSize, float& yVelocity) {
 	bool collided = false;
 
 	if (position.x > arena.width - tileSize*1.5) {
@@ -13,6 +13,15 @@ bool collision::boundsCheck(Vector2f& position, const IntRect& arena, int tileSi
 	if (position.x < tileSize*1.5) {
 		position.x = tileSize*1.5;
 		collided = true;
+	}
+	if (position.y > arena.height - tileSize*1.5) {
+		position.y = arena.height - tileSize*1.5;
+		collided = true;
+	}
+	if (position.y < tileSize*1.5) {
+		position.y = tileSize*1.5;
+		collided = true;
+		yVelocity = 0;
 	}
 
 	return collided;
@@ -30,7 +39,7 @@ bool collision::floorCheck(Vector2f& position, const VertexArray& level, IntRect
 		auto bottomLeft = level[i + 3].position;
 		auto tileBounds = FloatRect(topLeft.x, topLeft.y, topRight.x - topLeft.x, bottomLeft.y - topLeft.y);
 
-		if (level[i].texCoords.y == 2 * tileSize) {
+		if (level[i].texCoords.y >= 2 * tileSize) {
 			int verticalOffset = 0;
 			if (bounds.intersects(tileBounds)) {
 				// If the block is above the character
@@ -68,4 +77,9 @@ bool collision::floorCheck(Vector2f& position, const VertexArray& level, IntRect
 		}
 	}
 	return onFloor;
+}
+
+bool collision::collisionCheck(const sf::FloatRect& firstBounds, const sf::FloatRect& secondBounds) {
+
+	return firstBounds.intersects(secondBounds);
 }

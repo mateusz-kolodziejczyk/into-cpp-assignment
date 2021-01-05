@@ -41,7 +41,18 @@ bool ZombieSpawner::timerCheck(float elapsedTime) {
 Zombie* ZombieSpawner::spawn() {
 	if (m_ReadyToSpawn) {
 		auto zombie = new Zombie(m_OnTheRight);
-		int type = (rand() % m_ZombieTypes.size());
+		int rnd = (rand() % m_ZombieTypes.size());
+		int type = 0;
+		int i = 0;
+		// Go through the set to find a random zombie type
+		for (int zombieType : m_ZombieTypes) {
+			if (i == rnd) {
+				type = zombieType;
+			}
+			else {
+				i++;
+			}
+		}
 		zombie->spawn(m_Position.x, m_Position.y, type);
 		return zombie;
 

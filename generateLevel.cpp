@@ -38,10 +38,10 @@ int generateLevel(VertexArray& rVA, IntRect arena) {
 				int verticalOffset = 1 * TILE_SIZE;
 				int rnd = rand() % 10;
 				int floorOffset = 2 * TILE_SIZE;
-				if (rnd > 9) {
+				if (rnd > 7) {
 					floorOffset = 4 * TILE_SIZE;
 				}
-				else if (rnd > 8) {
+				else if (rnd > 6) {
 					floorOffset = 3 * TILE_SIZE;
 				}
 				// This code will generate the pattern in the games' map

@@ -52,7 +52,7 @@ void Zombie::spawn(float startX, float startY, int type) {
 bool Zombie::takeDamage() {
 	m_Health--;
 
-	if (m_Health < 0) {
+	if (m_Health <= 0) {
 		m_Alive = false;
 		return true;
 	}
@@ -80,7 +80,7 @@ void Zombie::update(float elapsedTime, Vector2f playerLocation, const VertexArra
 	// Move the sprite
 	m_Sprite.setPosition(m_Position);
 	bool onFloor = collision::floorCheck(m_Position,level, arena, m_Sprite.getGlobalBounds(), tileSize, m_LastPosition, yVelocity);
-	bool hitWall = collision::boundsCheck(m_Position, arena, tileSize);
+	bool hitWall = collision::boundsCheck(m_Position, arena, tileSize, yVelocity);
 	if (hitWall) {
 		m_MovingLeft = !m_MovingLeft;
 		m_Sprite.scale(-1.0f, 1.0f);
