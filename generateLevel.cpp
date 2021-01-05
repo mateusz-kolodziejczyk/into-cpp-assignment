@@ -35,13 +35,22 @@ int generateLevel(VertexArray& rVA, IntRect arena) {
 				rVA[currentVertex + 3].texCoords = Vector2f(0, 0 + TILE_SIZE);
 			}
 			else {
-				int verticalOffset = 3 * TILE_SIZE;
-				if (h % 3 == 0) {
-					if ((h % 6 != 0 || h == worldHeight - 1) && (w < worldWidth / 2 - 1 || w > worldWidth / 2 + 1 || h == worldHeight - 1)) {
-						verticalOffset = 1 * TILE_SIZE;
+				int verticalOffset = 1 * TILE_SIZE;
+				int rnd = rand() % 10;
+				int floorOffset = 2 * TILE_SIZE;
+				if (rnd > 9) {
+					floorOffset = 4 * TILE_SIZE;
+				}
+				else if (rnd > 8) {
+					floorOffset = 3 * TILE_SIZE;
+				}
+				// This code will generate the pattern in the games' map
+				if (h % 4 == 0) {
+					if ((h % 8 != 0 || h == worldHeight - 1) && (w < worldWidth / 2 - 1 || w > worldWidth / 2 + 1 || h == worldHeight - 1)) {
+						verticalOffset = floorOffset;
 					}
-					else if (h % 6 == 0 && (w < worldWidth / 4 || (w > worldWidth / 4 + 1 && w < (worldWidth / 4) * 3) || w >(worldWidth / 4) * 3 + 1)) {
-						verticalOffset = 1 * TILE_SIZE;
+					else if (h % 8 == 0 && (w < worldWidth / 4 || (w > worldWidth / 4 + 1 && w < (worldWidth / 4) * 3) || w >(worldWidth / 4) * 3 + 1)) {
+						verticalOffset = floorOffset;
 					}
 				}
 				rVA[currentVertex + 0].texCoords = Vector2f(0, verticalOffset);

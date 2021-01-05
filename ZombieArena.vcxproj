@@ -149,10 +149,10 @@
     <ClCompile Include="generateLevel.cpp" />
     <ClCompile Include="Physics.cpp" />
     <ClCompile Include="Player.cpp" />
-    <ClCompile Include="zombieHorde.cpp" />
     <ClCompile Include="textureHolder.cpp" />
     <ClCompile Include="zombie.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="zombieSpawner.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="collision.h" />
@@ -161,6 +161,7 @@
     <ClInclude Include="textureHolder.h" />
     <ClInclude Include="zombie.h" />
     <ClInclude Include="ZombieArena.h" />
+    <ClInclude Include="zombieSpawner.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

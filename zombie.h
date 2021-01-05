@@ -15,14 +15,14 @@ class Zombie
 {
 private:
     // How fast is each zombie type?
-    const float BLOATER_SPEED = 40;
-    const float CHASER_SPEED = 80;
-    const float CRAWLER_SPEED = 20;
+    const float REGULAR_SPEED = 60;
+    const float FAST_SPEED = 100;
+    const float SLOW_SPEED = 20;
 
     // How tough is each zombie type
-    const float BLOATER_HEALTH = 5;
-    const float CHASER_HEALTH = 1;
-    const float CRAWLER_HEALTH = 3;
+    const float REGULAR_HEALTH = 3;
+    const float FAST_HEALTH = 1;
+    const float SLOW_HEALTH = 5;
 
     // Make each zombie vary its speed slightly
     const int MAX_VARIANCE = 30;
@@ -57,15 +57,14 @@ private:
 
     // Public prototypes go here
 public:
+    // Zombies will either spawn on the right or left, needing their direction set at the start
+    Zombie(bool movingLeft);
 
     // Handle when a bullet hits a zombie
-    bool hit();
-
-    // Find out if the zombie is alive
-    bool isAlive();
+    bool takeDamage();
 
     // Spawn a new zombie
-    void spawn(float startX, float startY, int type, int seed);
+    void spawn(float startX, float startY, int type);
 
     // Return a rectangle that is the position in the world
     FloatRect getPosition();

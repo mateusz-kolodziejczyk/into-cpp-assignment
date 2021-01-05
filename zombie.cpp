@@ -6,26 +6,32 @@
 #include "collision.h"
 #include "physics.h"
 
-enum class ZombieType { BLOATER, CRAWLER, CHASER };
-void Zombie::spawn(float startX, float startY, int type, int seed) {
+enum class ZombieType { REGULAR, SLOW, FAST };
+
+Zombie::Zombie(bool movingLeft) :
+	m_MovingLeft(movingLeft)
+{
+
+}
+void Zombie::spawn(float startX, float startY, int type) {
 	switch ((ZombieType)type) {
-	case ZombieType::BLOATER:
+	case ZombieType::REGULAR:
 		m_Sprite = Sprite(TextureHolder::GetTexture("graphics/characters/zombie_walk1.png"));
 
-		m_Speed = BLOATER_SPEED;
-		m_Health = BLOATER_HEALTH;
+		m_Speed = REGULAR_SPEED;
+		m_Health = REGULAR_HEALTH;
 		break;
-	case ZombieType::CRAWLER:
+	case ZombieType::SLOW:
 		m_Sprite = Sprite(TextureHolder::GetTexture("graphics/characters/zombie_walk1.png"));
 		m_Sprite.setColor(sf::Color(255,140,140));
-		m_Speed = CRAWLER_SPEED;
-		m_Health = CRAWLER_HEALTH;
+		m_Speed = SLOW_SPEED;
+		m_Health = SLOW_HEALTH;
 		break;
-	case ZombieType::CHASER:
+	case ZombieType::FAST:
 		m_Sprite = Sprite(TextureHolder::GetTexture("graphics/characters/zombie_walk1.png"));
 		m_Sprite.setColor(sf::Color(255,140,255));
-		m_Speed = CHASER_SPEED;
-		m_Health = CHASER_HEALTH;
+		m_Speed = FAST_SPEED;
+		m_Health = FAST_HEALTH;
 		break;
 	}
 	float modifier = (rand() % MAX_VARIANCE) + OFFSET;
@@ -43,19 +49,14 @@ void Zombie::spawn(float startX, float startY, int type, int seed) {
 	m_MovingLeft ? m_Sprite.scale(-1.0f, 1.0f) : m_Sprite.scale(1.0f, 1.0f);
 }
 
-bool Zombie::hit() {
+bool Zombie::takeDamage() {
 	m_Health--;
 
 	if (m_Health < 0) {
 		m_Alive = false;
-		m_Sprite.setTexture(TextureHolder::GetTexture("graphics/blood.png"));
 		return true;
 	}
 	return false;
-}
-
-bool Zombie::isAlive() {
-	return m_Alive;
 }
 
 FloatRect Zombie::getPosition() {

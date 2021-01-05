@@ -7,6 +7,8 @@
 #include "Player.h"
 #include "ZombieArena.h"
 #include "textureHolder.h"
+#include "zombieSpawner.h"
+#include <set>
 
 using namespace sf;
 int main()
@@ -34,16 +36,17 @@ int main()
 	VertexArray background;
 
 	Texture textureBackground;
-	textureBackground.loadFromFile("graphics/background_sheet.png");
+	textureBackground.loadFromFile("graphics/tilesheets/tiles.png");
 
-	int numZombies = 0;
+	int zombiesLeftToSpawn = 0;
 	int numZombiesAlive = 0;
 	int tileSize = 0;
-	Zombie* zombies = nullptr;
+	std::vector<Zombie*> zombies;
+	std::vector<ZombieSpawner> zombieSpawners;
 	while (window.isOpen()) {
 		//Handle input
 		// Handle events
-	
+
 		Event event;
 		while (window.pollEvent(event)) {
 			if (event.type == Event::KeyPressed) {
@@ -59,57 +62,59 @@ int main()
 
 
 					arena.width = 1000;
-					arena.height = 650;
+					arena.height = 850;
 					arena.left = 0;
 					arena.top = 0;
+					zombiesLeftToSpawn = 10;
 
 					tileSize = generateLevel(background, arena);
 
 					std::cout << "\nTile size main: " << tileSize;
 					player.spawn(arena, resolution, tileSize);
-					numZombies = 10;
+					mainView.setCenter(arena.width / 2, arena.height / 2);
 
-					delete[] zombies;
-					zombies = createHorde(numZombies, arena);
-					numZombiesAlive = numZombies;
+					std::set<int> zombieTypes = { 1 };
+					auto rightSpawner = ZombieSpawner(Vector2f(arena.width - tileSize * 1.5, tileSize * 2.5), 10, zombieTypes, true);
+					auto leftSpawner = ZombieSpawner(Vector2f(tileSize * 1.5, tileSize * 2.5), 10, zombieTypes, false);
+					zombieSpawners.push_back(rightSpawner);
+					zombieSpawners.push_back(leftSpawner);
 					clock.restart();
 				}
 
 			}
 
-		}
+			if (Keyboard::isKeyPressed(Keyboard::Escape)) {
+				window.close();
+			}
 
-		if (Keyboard::isKeyPressed(Keyboard::Escape)) {
-			window.close();
-		}
-
-		if (state == State::PLAYING) {
-			if (Keyboard::isKeyPressed(Keyboard::W)) {
-				player.moveUp();
-			}
-			else {
-				player.stopUp();
-			}
-			if (Keyboard::isKeyPressed(Keyboard::S)) {
-				player.moveDown();
-			}
-			else {
-				player.stopDown();
-			}
-			if (Keyboard::isKeyPressed(Keyboard::A)) {
-				player.moveLeft();
-			}
-			else {
-				player.stopLeft();
-			}
-			if (Keyboard::isKeyPressed(Keyboard::D)) {
-				player.moveRight();
-			}
-			else {
-				player.stopRight();
-			}
-			if (Keyboard::isKeyPressed(Keyboard::Space)) {
-				player.jump();
+			if (state == State::PLAYING) {
+				if (Keyboard::isKeyPressed(Keyboard::W)) {
+					player.moveUp();
+				}
+				else {
+					player.stopUp();
+				}
+				if (Keyboard::isKeyPressed(Keyboard::S)) {
+					player.moveDown();
+				}
+				else {
+					player.stopDown();
+				}
+				if (Keyboard::isKeyPressed(Keyboard::A)) {
+					player.moveLeft();
+				}
+				else {
+					player.stopLeft();
+				}
+				if (Keyboard::isKeyPressed(Keyboard::D)) {
+					player.moveRight();
+				}
+				else {
+					player.stopRight();
+				}
+				if (Keyboard::isKeyPressed(Keyboard::Space)) {
+					player.jump();
+				}
 			}
 		}
 
@@ -126,15 +131,26 @@ int main()
 			player.update(dtAsSeconds, Mouse::getPosition(), background);
 
 			Vector2f playerPosition(player.getCenter());
-			mainView.setCenter(player.getCenter());
-
-			for (int i = 0; i < numZombies; i++) {
-				if (zombies[i].isAlive()) {
-					zombies[i].update(dt.asSeconds(), playerPosition, background, arena, tileSize);
+			// Handle spawning zombies
+			for (auto it = zombieSpawners.begin(); it != zombieSpawners.end(); it++) {
+				bool readyToSpawn = it->timerCheck(dtAsSeconds);
+				if (readyToSpawn) {
+					// Only spawn more if there are any left to spawn on the level
+					if (zombiesLeftToSpawn > 0) {
+						auto zombieToAdd = it->spawn();
+						if (zombieToAdd != nullptr) {
+							zombies.push_back(zombieToAdd);
+							zombiesLeftToSpawn -= 1;
+						}
+					}
 				}
 			}
 
+			for (auto zombie : zombies) {
+				zombie->update(dt.asSeconds(), playerPosition, background, arena, tileSize);
+			}
 		}
+
 		//Draw the scene
 		if (state == State::PLAYING) {
 			window.clear();
@@ -143,8 +159,8 @@ int main()
 
 			window.draw(background, &textureBackground);
 			window.draw(player.getSprite());
-			for (int i = 0; i < numZombies; i++) {
-				window.draw(zombies[i].getSprite());
+			for (int i = 0; i < zombies.size(); i++) {
+				window.draw(zombies[i]->getSprite());
 			}
 
 			if (state == State::PAUSED) {
@@ -156,7 +172,10 @@ int main()
 			window.display();
 		}
 	}
-	delete[] zombies;
+	for (auto zombie : zombies) {
+		delete(zombie);
+	}
+	zombies.clear();
 	return 0;
 }
 

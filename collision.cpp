@@ -6,12 +6,12 @@ using namespace sf;
 bool collision::boundsCheck(Vector2f& position, const IntRect& arena, int tileSize) {
 	bool collided = false;
 
-	if (position.x > arena.width - tileSize) {
-		position.x = arena.width - tileSize;
+	if (position.x > arena.width - tileSize*1.5) {
+		position.x = arena.width - tileSize*1.5;
 		collided = true;
 	}
-	if (position.x < tileSize) {
-		position.x = tileSize;
+	if (position.x < tileSize*1.5) {
+		position.x = tileSize*1.5;
 		collided = true;
 	}
 
@@ -30,7 +30,7 @@ bool collision::floorCheck(Vector2f& position, const VertexArray& level, IntRect
 		auto bottomLeft = level[i + 3].position;
 		auto tileBounds = FloatRect(topLeft.x, topLeft.y, topRight.x - topLeft.x, bottomLeft.y - topLeft.y);
 
-		if (level[i].texCoords.y == 1 * tileSize || level[i].texCoords.y == 2 * tileSize) {
+		if (level[i].texCoords.y == 2 * tileSize) {
 			int verticalOffset = 0;
 			if (bounds.intersects(tileBounds)) {
 				// If the block is above the character
