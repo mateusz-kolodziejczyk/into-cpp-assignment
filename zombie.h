@@ -15,13 +15,13 @@ class Zombie
 {
 private:
     // How fast is each zombie type?
-    const float REGULAR_SPEED = 60;
-    const float FAST_SPEED = 100;
-    const float SLOW_SPEED = 20;
+    const float REGULAR_SPEED = 100;
+    const float FAST_SPEED = 150;
+    const float SLOW_SPEED = 60;
 
     // How tough is each zombie type
     const float REGULAR_HEALTH = 3;
-    const float FAST_HEALTH = 1;
+    const float FAST_HEALTH = 2;
     const float SLOW_HEALTH = 5;
 
     // Make each zombie vary its speed slightly
@@ -71,6 +71,11 @@ public:
 
     // Get a copy of the sprite to draw
     Sprite getSprite();
+
+    // Stop the zombie from moving when they attack a player
+    void stopMoving();
+    // Make the zombie move again when the player moves away.
+    void startMoving();
 
     // Animate movement of the zombie
     void animateMovement(float elapsedTime);

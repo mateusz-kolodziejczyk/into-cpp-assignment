@@ -45,20 +45,35 @@ Zombie* ZombieSpawner::spawn() {
 		int type = 0;
 		int i = 0;
 		// Go through the set to find a random zombie type
-		for (int zombieType : m_ZombieTypes) {
-			if (i == rnd) {
-				type = zombieType;
-			}
-			else {
-				i++;
-			}
+		auto it = m_ZombieTypes.begin();
+		for (int i = 0; i < rnd; i++)
+		{
+			it++;
 		}
+		type = *it;
+		std::cout << "\nType: " << type;
 		zombie->spawn(m_Position.x, m_Position.y, type);
 		return zombie;
 
 		m_ReadyToSpawn = false;
 	}
 	return nullptr;
+}
+
+int ZombieSpawner::getZombieTypesAmount() {
+	return m_ZombieTypes.size();
+}
+
+float ZombieSpawner::getSpawnInterval() {
+	return m_SpawnInterval;
+}
+
+void ZombieSpawner::setSpawnTimer(float spawnTimer) {
+	m_SpawnTimer = spawnTimer;
+}
+
+float ZombieSpawner::getSpawnTimer() {
+	return m_SpawnTimer;
 }
 
 

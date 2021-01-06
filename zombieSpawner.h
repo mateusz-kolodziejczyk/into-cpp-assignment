@@ -21,6 +21,10 @@ public:
 	ZombieSpawner(sf::Vector2f position,float spawnInterval, std::set<int> zombieTypes, bool onTheRight);
 	void addZombieType(int zombieType);
 	void setSpawnInterval(float spawnInterval);
+	float getSpawnInterval();
+	void setSpawnTimer(float spawnTimer);
+	float getSpawnTimer();
+	int getZombieTypesAmount();
 	//  will check if enough time has elapsed
 	bool timerCheck(float elapsedTime);
 	Zombie* spawn();
