@@ -221,7 +221,7 @@ int main()
 					arena.height = 850;
 					arena.left = 0;
 					arena.top = 0;
-					zombiesLeftToSpawn = 1;
+					zombiesLeftToSpawn = 5;
 					timeRemaining = 20;
 
 					tileSize = generateLevel(level, arena);
