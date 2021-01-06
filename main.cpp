@@ -81,11 +81,22 @@ int main()
 	pausedText.setCharacterSize(150);
 	pausedText.setFillColor(Color::White);
 	pausedText.setString("Press Enter \nto Continue");
-
 	// Place is middle of screen
 	FloatRect pausedRect = pausedText.getLocalBounds();
 	pausedText.setOrigin(pausedRect.left + pausedRect.width / 2.0f, pausedRect.top + pausedRect.height / 2.0f);
 	pausedText.setPosition(resolution.x / 2, resolution.y / 2);
+
+	// Title
+	Text titleText;
+	titleText.setFont(font);
+	titleText.setCharacterSize(250);
+	titleText.setFillColor(Color::White);
+	titleText.setString("SURVIV");
+	// Place above the middle of the screen
+	FloatRect titleRect = titleText.getLocalBounds();
+	titleText.setOrigin(titleRect.left + titleRect.width / 2.0f, titleRect.top + titleRect.height / 2.0f);
+	titleText.setPosition(resolution.x / 2, resolution.y / 4);
+
 
 	// Game Over
 	Text gameOverText;
@@ -214,6 +225,7 @@ int main()
 					fireRate = START_FIRE_RATE;
 					state = State::PLAYING;
 
+					score = 0;
 					wave = 0;
 					wave++;
 
@@ -455,7 +467,7 @@ int main()
 				// Set pickup to nullptr
 				pickup = nullptr;
 				PickupType type = static_cast<PickupType>(rand() % 3);
-				pickup = new Pickup(PickupType::FIRE_RATE, Vector2f(500, 500));
+				pickup = new Pickup(type, Vector2f(500, 500));
 			}
 			// If there are no zombies on the screen, accelerate zombie spawns
 			else if (zombiesLeftToSpawn > 0 && zombies.size() <= 0) {
@@ -547,6 +559,7 @@ int main()
 			window.draw(gameOverText);
 			window.draw(scoreText);
 			window.draw(hiScoreText);
+			window.draw(titleText);
 		}
 		window.display();
 	}
