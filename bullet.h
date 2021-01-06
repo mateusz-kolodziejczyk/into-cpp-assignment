@@ -4,14 +4,13 @@
 
 #include <SFML/Graphics.hpp>
 
-using namespace sf;
 
 class Bullet
 {
 private:
-    Vector2f m_Position;
+    sf::Vector2f m_Position;
 
-    RectangleShape m_BulletShape;
+    sf::RectangleShape m_BulletShape;
 
     float m_BulletSpeed = 500;
 
@@ -22,11 +21,11 @@ private:
 
 public:
     Bullet();
-    Bullet(float startX, float startY, bool movingRight, const IntRect& Arena);
+    Bullet(float startX, float startY, bool movingRight, const sf::IntRect& Arena);
 
-    FloatRect getPosition();
+    sf::FloatRect getPosition();
 
-    RectangleShape getShape();
+    sf::RectangleShape getShape();
 
     bool update(float elapsedTime);
 

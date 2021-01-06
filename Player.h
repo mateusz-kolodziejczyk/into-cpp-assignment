@@ -4,7 +4,7 @@
 
 
 
-enum class AnimationState { MOVING, JUMPING, IDLE };
+enum class AnimationState { MOVING, JUMPING, IDLE, SHOOTING };
 class Player
 {
 private:
@@ -32,8 +32,8 @@ private:
 	float m_MoveAnimationLength;
 	float m_MoveAnimationTimer = 0;
 	int m_MoveAnimation = 1;
-	float m_ShootingAnimationLength;
-	float m_ShootingAnimationTimer;
+	float m_ShootingAnimationLength = 0.2;
+	float m_ShootingAnimationTimer = 0;
 	AnimationState m_AnimationState;
 	
 
@@ -74,7 +74,10 @@ public:
 	void increaseHealthLevel(int amount);
 
 	void animateMovement(float elapsedTime);
+	void animateShooting(float elapsedTime);
 	void animate(float elapsedTime);
+
+	void shoot();
 
 	float getDirection();
 

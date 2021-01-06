@@ -51,7 +51,6 @@ Zombie* ZombieSpawner::spawn() {
 			it++;
 		}
 		type = *it;
-		std::cout << "\nType: " << type;
 		zombie->spawn(m_Position.x, m_Position.y, type);
 		return zombie;
 

@@ -13,6 +13,8 @@
 #include <set>
 #include <sstream>
 #include <fstream>
+#include <SFML/Audio.hpp>
+#include "pickup.h"
 
 using namespace sf;
 int main()
@@ -37,19 +39,23 @@ int main()
 	Player player;
 	IntRect arena;
 
-	VertexArray background;
+	VertexArray level;
 
-	Texture textureBackground;
-	textureBackground.loadFromFile("graphics/tilesheets/tiles.png");
+	Texture textureLevel;
+	textureLevel.loadFromFile("graphics/tilesheets/tiles.png");
 
 	int zombiesLeftToSpawn = 0;
 	int numZombiesAlive = 0;
 	int tileSize = 0;
 	std::vector<Zombie*> zombies;
 	std::vector<Bullet> bullets;
+	// Will only have one pickup spawned at the end of each wave, so no need for a vector.
+	// Is a pointer as there will be no pickup on launch.
+	Pickup* pickup = nullptr;
 	std::vector<ZombieSpawner> zombieSpawners;
 	Time lastShot;
-	float fireRate = 3;
+	const float START_FIRE_RATE = 3;
+	float fireRate = START_FIRE_RATE;
 	int hiScore = 0;
 	int score = 0;
 	float timeRemaining = 30;
@@ -123,7 +129,7 @@ int main()
 	zombiesRemainingText.setString("Zombies: 100");
 
 	// Time Remaining
-	
+
 	Text timeRemainingText;
 	timeRemainingText.setFont(font);
 	timeRemainingText.setCharacterSize(55);
@@ -152,6 +158,32 @@ int main()
 	// How often should the hud be updated
 	int fpsMeasurementFrameInterval = 30;
 
+	// Sound
+	// Hit sound
+	SoundBuffer hitBuffer;
+	hitBuffer.loadFromFile("sound/hit.wav");
+	Sound hit;
+	hit.setBuffer(hitBuffer);
+
+	// Zombie Death sound
+	SoundBuffer zombieDeathBuffer;
+	zombieDeathBuffer.loadFromFile("sound/zombie_death.wav");
+	Sound zombieDeath;
+	zombieDeath.setBuffer(zombieDeathBuffer);
+
+
+	// Zombie Death sound
+	SoundBuffer shotBuffer;
+	shotBuffer.loadFromFile("sound/shot.wav");
+	Sound shot;
+	shot.setBuffer(shotBuffer);
+
+	// Pickup sound
+	SoundBuffer pickupBuffer;
+	pickupBuffer.loadFromFile("sound/pickup.wav");
+	Sound pickupSound;
+	pickupSound.setBuffer(pickupBuffer);
+
 	while (window.isOpen()) {
 		//Handle input
 		// Handle events
@@ -173,18 +205,26 @@ int main()
 					zombies.clear();
 					bullets.clear();
 					zombieSpawners.clear();
+
+					delete(pickup);
+					pickup = nullptr;
+
+					// Reset stats
+					player.resetPlayerStats();
+					fireRate = START_FIRE_RATE;
 					state = State::PLAYING;
 
+					wave = 0;
 					wave++;
 
 					arena.width = 1000;
 					arena.height = 850;
 					arena.left = 0;
 					arena.top = 0;
-					zombiesLeftToSpawn = 6;
+					zombiesLeftToSpawn = 1;
 					timeRemaining = 20;
 
-					tileSize = generateLevel(background, arena);
+					tileSize = generateLevel(level, arena);
 
 					player.spawn(arena, resolution, tileSize);
 					mainView.setCenter(arena.width / 2, arena.height / 2);
@@ -195,6 +235,7 @@ int main()
 					zombieSpawners.push_back(rightSpawner);
 					zombieSpawners.push_back(leftSpawner);
 					clock.restart();
+
 				}
 
 			}
@@ -230,6 +271,8 @@ int main()
 				auto bullet = Bullet(player.getCenter().x + player.getDirection() * (player.getPosition().width / 2), player.getCenter().y + 10, facingRight, arena);
 				bullets.push_back(bullet);
 				lastShot = gameTimeTotal;
+				player.shoot();
+				shot.play();
 			}
 
 		}
@@ -247,7 +290,7 @@ int main()
 			mouseScreenPosition = Mouse::getPosition(window);
 			mouseWorldPosition = window.mapPixelToCoords(Mouse::getPosition(), mainView);
 
-			player.update(dtAsSeconds, Mouse::getPosition(), background);
+			player.update(dtAsSeconds, Mouse::getPosition(), level);
 
 			Vector2f playerPosition(player.getCenter());
 			// Handle spawning zombies
@@ -266,7 +309,15 @@ int main()
 			}
 
 			for (auto zombie : zombies) {
-				zombie->update(dt.asSeconds(), playerPosition, background, arena, tileSize);
+				zombie->update(dt.asSeconds(), playerPosition, level, arena, tileSize);
+			}
+
+			if (pickup != nullptr) {
+				// If it returns true, the pickup should be deleted
+				if (pickup->update(dtAsSeconds)) {
+					delete(pickup);
+					pickup = nullptr;
+				}
 			}
 
 
@@ -302,6 +353,7 @@ int main()
 							// Release the memeory from the zombie
 							delete(*zombieIter);
 							zombieIter = zombies.erase(zombieIter);
+							zombieDeath.play();
 						}
 						else {
 							++zombieIter;
@@ -327,6 +379,7 @@ int main()
 				{
 					if (player.hit(gameTimeTotal))
 					{
+						hit.play();
 					}
 
 					if (player.getHealth() <= 0)
@@ -340,11 +393,39 @@ int main()
 				}
 			}// End player touched
 
+			// Has the player collected the pickup?
+			if (pickup != nullptr) {
+				if (collision::collisionCheck(pickup->getPosition(), player.getPosition())) {
+					switch (pickup->getType()) {
+					case PickupType::FIRE_RATE:
+					{
+						float fireRateModifier = pickup->gotIt();
+						fireRate += fireRateModifier*START_FIRE_RATE;
+						break;
+					}
+					case PickupType::HEALTH:
+						player.upgradeHealth();
+						break;
+					case PickupType::SPEED:
+						player.upgradeSpeed();
+						break;
+					}
+					delete(pickup);
+					pickup = nullptr;
+					pickupSound.play();
+				}
+			}
+
 			// The wave is cleared
 			if (zombiesLeftToSpawn <= 0 && zombies.size() <= 0) {
 				wave++;
-				zombiesLeftToSpawn = 6+wave*3;
-				timeRemaining += 15;
+				zombiesLeftToSpawn = 5 + (wave-1) * 2;
+				if (15 - wave >= 5) {
+					timeRemaining += 15 - wave;
+				}
+				else {
+					timeRemaining += 5;
+				}
 				// Upgrade a spawner based on current wave
 				if (wave % 2 == 0) {
 					int zombieTypesAmount = zombieSpawners[0].getZombieTypesAmount();
@@ -368,6 +449,13 @@ int main()
 						zombieSpawners[1].setSpawnInterval(spawnInterval - 0.5);
 					}
 				}
+				// Spawn a pickup
+				// Delete the pickup if it exists
+				delete(pickup);
+				// Set pickup to nullptr
+				pickup = nullptr;
+				PickupType type = static_cast<PickupType>(rand() % 3);
+				pickup = new Pickup(PickupType::FIRE_RATE, Vector2f(500, 500));
 			}
 			// If there are no zombies on the screen, accelerate zombie spawns
 			else if (zombiesLeftToSpawn > 0 && zombies.size() <= 0) {
@@ -416,7 +504,7 @@ int main()
 
 			window.setView(mainView);
 
-			window.draw(background, &textureBackground);
+			window.draw(level, &textureLevel);
 			window.draw(player.getSprite());
 
 			for (auto zombie : zombies) {
@@ -428,6 +516,11 @@ int main()
 
 			for (auto bullet : bullets) {
 				window.draw(bullet.getShape());
+			}
+
+			// Only draw if it exists
+			if (pickup != nullptr) {
+				window.draw(pickup->getSprite());
 			}
 
 			window.setView(hudView);
@@ -457,20 +550,12 @@ int main()
 		}
 		window.display();
 	}
+	// Dynamic Memory cleanup
 	for (auto zombie : zombies) {
 		delete(zombie);
 	}
 	zombies.clear();
+	delete(pickup);
 	return 0;
 }
 
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file

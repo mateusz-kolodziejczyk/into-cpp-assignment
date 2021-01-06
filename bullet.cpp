@@ -7,6 +7,7 @@
 #include "bullet.h"
 #include <iostream>
 
+using namespace sf;
 // The constructor
 Bullet::Bullet()
 {

@@ -149,6 +149,7 @@
     <ClCompile Include="collision.cpp" />
     <ClCompile Include="generateLevel.cpp" />
     <ClCompile Include="Physics.cpp" />
+    <ClCompile Include="pickup.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="textureHolder.cpp" />
     <ClCompile Include="zombie.cpp" />
@@ -159,6 +160,7 @@
     <ClInclude Include="bullet.h" />
     <ClInclude Include="collision.h" />
     <ClInclude Include="Physics.h" />
+    <ClInclude Include="pickup.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="textureHolder.h" />
     <ClInclude Include="zombie.h" />

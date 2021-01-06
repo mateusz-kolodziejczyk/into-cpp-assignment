@@ -20,7 +20,7 @@ Player::Player() {
 	m_Sprite.setTexture(m_Texture);
 
 	//Origin
-	m_Sprite.setOrigin(25, 25);
+	m_Sprite.setOrigin(25, 35);
 }
 
 void Player::spawn(IntRect arena, Vector2f resolution, int tileSize) {
@@ -124,7 +124,7 @@ void Player::update(float elapsedTime, Vector2i mousePosition, sf::VertexArray& 
 	if (m_LeftPressed) {
 		m_Position.x -= m_Speed * elapsedTime;
 		// Only change animation to moving if the player isnt curently jumping
-		if (m_AnimationState != AnimationState::JUMPING) {
+		if (m_AnimationState != AnimationState::JUMPING && m_AnimationState != AnimationState::SHOOTING) {
 			m_AnimationState = AnimationState::MOVING;
 		}
 		// Flip sprite if its not facing the correct direction
@@ -144,7 +144,7 @@ void Player::update(float elapsedTime, Vector2i mousePosition, sf::VertexArray& 
 	else if (m_Jumped) {
 		m_Jumped = false;
 	}
-	if (!m_LeftPressed && !m_RightPressed && !m_JumpedRecently) {
+	if (!m_LeftPressed && !m_RightPressed && !m_JumpedRecently && m_AnimationState != AnimationState::SHOOTING) {
 		m_AnimationState = AnimationState::IDLE;
 	}
 	animate(elapsedTime);
@@ -161,7 +161,9 @@ void Player::update(float elapsedTime, Vector2i mousePosition, sf::VertexArray& 
 	}
 	else {
 		m_JumpedRecently = false;
-		m_AnimationState = AnimationState::IDLE;
+		if (m_AnimationState != AnimationState::SHOOTING) {
+			m_AnimationState = AnimationState::IDLE;
+		}
 	}
 
 	m_LastPosition = tempLastPosition;
@@ -173,6 +175,7 @@ void Player::upgradeSpeed() {
 }
 void Player::upgradeHealth() {
 	m_MaxHealth += (START_HEALTH * 0.2);
+	m_Health = m_MaxHealth;
 }
 void Player::increaseHealthLevel(int amount) {
 	m_Health += amount;
@@ -187,7 +190,6 @@ void Player::jump() {
 
 void Player::animateMovement(float elapsedTime) {
 	m_MoveAnimationTimer += elapsedTime;
-	std::cout << "\nTimer: " << m_MoveAnimationTimer << " Length: " << m_MoveAnimationLength;
 	if (m_MoveAnimationTimer >= m_MoveAnimationLength) {
 		m_MoveAnimationTimer = 0;
 
@@ -206,6 +208,7 @@ void Player::animateMovement(float elapsedTime) {
 	}
 }
 
+
 void Player::animate(float elapsedTime) {
 	switch (m_AnimationState) {
 	case AnimationState::IDLE:
@@ -217,9 +220,27 @@ void Player::animate(float elapsedTime) {
 	case AnimationState::JUMPING:
 		m_Sprite.setTexture(TextureHolder::GetTexture("graphics/characters/player_jump.png"));
 		break;
+	case AnimationState::SHOOTING:
+		animateShooting(elapsedTime);
+		break;
 	default:
 		break;
 	}
 }
+void Player::animateShooting(float elapsedTime) {
+	m_ShootingAnimationTimer += elapsedTime;
+	if (m_ShootingAnimationTimer <= m_ShootingAnimationLength) {
+		m_Sprite.setTexture(TextureHolder::GetTexture("graphics/characters/player_shoot.png"));
+	}
+	else {
+		m_AnimationState = AnimationState::IDLE;
+		m_ShootingAnimationTimer = 0;
+	}
 
+}
+
+
+void Player::shoot() {
+	m_AnimationState = AnimationState::SHOOTING;
+}
 
